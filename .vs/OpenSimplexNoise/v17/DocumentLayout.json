@@ -5,6 +5,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{9886AB22-01D7-4E71-B282-FE259FC1E518}|OpenSimplexNoise\\OpenSimplexNoise.vcxproj|E:\\GitHub\\OpenSimplexNoise\\OpenSimplexNoise\\OpenSimplexNoise.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{9886AB22-01D7-4E71-B282-FE259FC1E518}|OpenSimplexNoise\\OpenSimplexNoise.vcxproj|solutionrelative:OpenSimplexNoise\\OpenSimplexNoise.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9886AB22-01D7-4E71-B282-FE259FC1E518}|OpenSimplexNoise\\OpenSimplexNoise.vcxproj|E:\\GitHub\\OpenSimplexNoise\\OpenSimplexNoise\\OpenSimplexNoise.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{9886AB22-01D7-4E71-B282-FE259FC1E518}|OpenSimplexNoise\\OpenSimplexNoise.vcxproj|solutionrelative:OpenSimplexNoise\\OpenSimplexNoise.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,8 +18,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "OpenSimplexNoise.h",
+              "DocumentMoniker": "E:\\GitHub\\OpenSimplexNoise\\OpenSimplexNoise\\OpenSimplexNoise.h",
+              "RelativeDocumentMoniker": "OpenSimplexNoise\\OpenSimplexNoise.h",
+              "ToolTip": "E:\\GitHub\\OpenSimplexNoise\\OpenSimplexNoise\\OpenSimplexNoise.h",
+              "RelativeToolTip": "OpenSimplexNoise\\OpenSimplexNoise.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-08-29T10:35:58.71Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -24,7 +41,7 @@
               "RelativeDocumentMoniker": "OpenSimplexNoise\\OpenSimplexNoise.cpp",
               "ToolTip": "E:\\GitHub\\OpenSimplexNoise\\OpenSimplexNoise\\OpenSimplexNoise.cpp",
               "RelativeToolTip": "OpenSimplexNoise\\OpenSimplexNoise.cpp",
-              "ViewState": "AgIAAPIJAAAAAAAAAAAYwBoKAAAEAAAAAAAAAA==",
+              "ViewState": "AgIAAAQKAAAAAAAAAAAAAEUKAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-08-23T21:31:10.934Z",
               "EditorCaption": ""

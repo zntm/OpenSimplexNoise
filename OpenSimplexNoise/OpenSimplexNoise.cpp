@@ -2541,8 +2541,6 @@ namespace OpenSimplexNoise
 
 }
 
-#include <cstdint>
-
 #define func extern "C" __declspec(dllexport)
 
 template <typename Func>
@@ -2554,6 +2552,7 @@ inline double open_simplex_fractal(Func eval, double amplitude, double octaves)
     double f = 1.0;
     double a = 1.0;
 
+#pragma omp parallel for
     for (int i = 0; i < octaves; ++i)
     {
         total += eval(f) * a;
@@ -2573,6 +2572,7 @@ func double open_simplex_noise_free()
     if (g_noise)
     {
         delete g_noise;
+
         g_noise = nullptr;
     }
 
