@@ -5,6 +5,12 @@ namespace OpenSimplexNoise
 {
     using namespace std;
 
+#ifdef _MSC_VER
+    #define FORCE_INLINE __forceinline
+#else
+    #define FORCE_INLINE __attribute__((always_inline)) inline
+#endif
+
     Noise::Noise()
         : m_stretch2d(-0.211324865405187) //(1/Math.sqrt(2+1)-1)/2;
         , m_squish2d(0.366025403784439)   //(Math.sqrt(2+1)-1)/2;
@@ -77,25 +83,25 @@ namespace OpenSimplexNoise
     double Noise::eval(double x, double y) const
     {
         //Place input coordinates onto grid.
-        double stretchOffset = (x + y) * m_stretch2d;
-        double xs = x + stretchOffset;
-        double ys = y + stretchOffset;
+        const double stretchOffset = (x + y) * m_stretch2d;
+        const double xs = x + stretchOffset;
+        const double ys = y + stretchOffset;
 
         //Floor to get grid coordinates of rhombus (stretched square) super-cell origin.
         int xsb = static_cast<int>(floor(xs));
         int ysb = static_cast<int>(floor(ys));
 
         //Skew out to get actual coordinates of rhombus origin. We'll need these later.
-        double squishOffset = (xsb + ysb) * m_squish2d;
-        double xb = xsb + squishOffset;
-        double yb = ysb + squishOffset;
+        const double squishOffset = (xsb + ysb) * m_squish2d;
+        const double xb = xsb + squishOffset;
+        const double yb = ysb + squishOffset;
 
         //Compute grid coordinates relative to rhombus origin.
-        double xins = xs - xsb;
-        double yins = ys - ysb;
+        const double xins = xs - xsb;
+        const double yins = ys - ysb;
 
         //Sum those together to get a value that determines which region we're in.
-        double inSum = xins + yins;
+        const double inSum = xins + yins;
 
         //Positions relative to origin point.
         double dx0 = x - xb;
@@ -108,8 +114,8 @@ namespace OpenSimplexNoise
         double value = 0;
 
         //Contribution (1,0)
-        double dx1 = dx0 - 1 - m_squish2d;
-        double dy1 = dy0 - 0 - m_squish2d;
+        const double dx1 = dx0 - 1 - m_squish2d;
+        const double dy1 = dy0 - 0 - m_squish2d;
         double attn1 = 2 - dx1 * dx1 - dy1 * dy1;
         if (attn1 > 0)
         {
@@ -118,8 +124,8 @@ namespace OpenSimplexNoise
         }
 
         //Contribution (0,1)
-        double dx2 = dx0 - 0 - m_squish2d;
-        double dy2 = dy0 - 1 - m_squish2d;
+        const double dx2 = dx0 - 0 - m_squish2d;
+        const double dy2 = dy0 - 1 - m_squish2d;
         double attn2 = 2 - dx2 * dx2 - dy2 * dy2;
         if (attn2 > 0)
         {
@@ -129,7 +135,7 @@ namespace OpenSimplexNoise
 
         if (inSum <= 1)
         { //We're inside the triangle (2-Simplex) at (0,0)
-            double zins = 1 - inSum;
+            const double zins = 1 - inSum;
             if (zins > xins || zins > yins)
             { //(0,0) is one of the closest two triangular vertices
                 if (xins > yins)
@@ -157,7 +163,7 @@ namespace OpenSimplexNoise
         }
         else
         { //We're inside the triangle (2-Simplex) at (1,1)
-            double zins = 2 - inSum;
+            const double zins = 2 - inSum;
             if (zins < xins || zins < yins)
             { //(0,0) is one of the closest two triangular vertices
                 if (xins > yins)
@@ -210,29 +216,29 @@ namespace OpenSimplexNoise
     double Noise::eval(double x, double y, double z) const
     {
         //Place input coordinates on simplectic honeycomb.
-        double stretchOffset = (x + y + z) * m_stretch3d;
-        double xs = x + stretchOffset;
-        double ys = y + stretchOffset;
-        double zs = z + stretchOffset;
+        const double stretchOffset = (x + y + z) * m_stretch3d;
+        const double xs = x + stretchOffset;
+        const double ys = y + stretchOffset;
+        const double zs = z + stretchOffset;
 
         //static_cast<int>(floor to get simplectic honeycomb coordinates of rhombohedron (stretched cube) super-cell origin.
-        int xsb = static_cast<int>(floor(xs));
-        int ysb = static_cast<int>(floor(ys));
-        int zsb = static_cast<int>(floor(zs));
+        const int xsb = static_cast<int>(floor(xs));
+        const int ysb = static_cast<int>(floor(ys));
+        const int zsb = static_cast<int>(floor(zs));
 
         //Skew out to get actual coordinates of rhombohedron origin. We'll need these later.
-        double squishOffset = (xsb + ysb + zsb) * m_squish3d;
-        double xb = xsb + squishOffset;
-        double yb = ysb + squishOffset;
-        double zb = zsb + squishOffset;
+        const double squishOffset = (xsb + ysb + zsb) * m_squish3d;
+        const double xb = xsb + squishOffset;
+        const double yb = ysb + squishOffset;
+        const double zb = zsb + squishOffset;
 
         //Compute simplectic honeycomb coordinates relative to rhombohedral origin.
-        double xins = xs - xsb;
-        double yins = ys - ysb;
-        double zins = zs - zsb;
+        const double xins = xs - xsb;
+        const double yins = ys - ysb;
+        const double zins = zs - zsb;
 
         //Sum those together to get a value that determines which region we're in.
-        double inSum = xins + yins + zins;
+        const double inSum = xins + yins + zins;
 
         //Positions relative to origin point.
         double dx0 = x - xb;
@@ -267,10 +273,10 @@ namespace OpenSimplexNoise
 
             //Now we determine the two lattice points not part of the tetrahedron that may contribute.
             //This depends on the closest two tetrahedral vertices, including (0,0,0)
-            double wins = 1 - inSum;
+            const double wins = 1 - inSum;
             if (wins > aScore || wins > bScore)
             { //(0,0,0) is one of the closest two tetrahedral vertices.
-                char c = (bScore > aScore ? bPoint : aPoint); //Our other closest vertex is the closest out of a and b.
+                const char c = (bScore > aScore ? bPoint : aPoint); //Our other closest vertex is the closest out of a and b.
 
                 if ((c & 0x01) == 0)
                 {
@@ -321,7 +327,7 @@ namespace OpenSimplexNoise
             }
             else
             { //(0,0,0) is not one of the closest two tetrahedral vertices.
-                char c = static_cast<char>(aPoint | bPoint); //Our two extra vertices are determined by the closest two.
+                const char c = static_cast<char>(aPoint | bPoint); //Our two extra vertices are determined by the closest two.
 
                 if ((c & 0x01) == 0)
                 {
@@ -375,9 +381,9 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,0,0)
-            double dx1 = dx0 - 1 - m_squish3d;
-            double dy1 = dy0 - 0 - m_squish3d;
-            double dz1 = dz0 - 0 - m_squish3d;
+            const double dx1 = dx0 - 1 - m_squish3d;
+            const double dy1 = dy0 - 0 - m_squish3d;
+            const double dz1 = dz0 - 0 - m_squish3d;
             double attn1 = 2 - dx1 * dx1 - dy1 * dy1 - dz1 * dz1;
             if (attn1 > 0)
             {
@@ -386,9 +392,9 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,1,0)
-            double dx2 = dx0 - 0 - m_squish3d;
-            double dy2 = dy0 - 1 - m_squish3d;
-            double dz2 = dz1;
+            const double dx2 = dx0 - 0 - m_squish3d;
+            const double dy2 = dy0 - 1 - m_squish3d;
+            const double dz2 = dz1;
             double attn2 = 2 - dx2 * dx2 - dy2 * dy2 - dz2 * dz2;
             if (attn2 > 0)
             {
@@ -397,9 +403,9 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,0,1)
-            double dx3 = dx2;
-            double dy3 = dy1;
-            double dz3 = dz0 - 1 - m_squish3d;
+            const double dx3 = dx2;
+            const double dy3 = dy1;
+            const double dz3 = dz0 - 1 - m_squish3d;
             double attn3 = 2 - dx3 * dx3 - dy3 * dy3 - dz3 * dz3;
             if (attn3 > 0)
             {
@@ -428,10 +434,10 @@ namespace OpenSimplexNoise
 
             //Now we determine the two lattice points not part of the tetrahedron that may contribute.
             //This depends on the closest two tetrahedral vertices, including (1,1,1)
-            double wins = 3 - inSum;
+            const double wins = 3 - inSum;
             if (wins < aScore || wins < bScore)
             { //(1,1,1) is one of the closest two tetrahedral vertices.
-                char c = (bScore < aScore ? bPoint : aPoint); //Our other closest vertex is the closest out of a and b.
+                const char c = (bScore < aScore ? bPoint : aPoint); //Our other closest vertex is the closest out of a and b.
 
                 if ((c & 0x01) != 0)
                 {
@@ -482,7 +488,7 @@ namespace OpenSimplexNoise
             }
             else
             { //(1,1,1) is not one of the closest two tetrahedral vertices.
-                char c = static_cast<char>(aPoint & bPoint); //Our two extra vertices are determined by the closest two.
+                const char c = static_cast<char>(aPoint & bPoint); //Our two extra vertices are determined by the closest two.
 
                 if ((c & 0x01) != 0)
                 {
@@ -528,9 +534,9 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,1,0)
-            double dx3 = dx0 - 1 - 2 * m_squish3d;
-            double dy3 = dy0 - 1 - 2 * m_squish3d;
-            double dz3 = dz0 - 0 - 2 * m_squish3d;
+            const double dx3 = dx0 - 1 - 2 * m_squish3d;
+            const double dy3 = dy0 - 1 - 2 * m_squish3d;
+            const double dz3 = dz0 - 0 - 2 * m_squish3d;
             double attn3 = 2 - dx3 * dx3 - dy3 * dy3 - dz3 * dz3;
             if (attn3 > 0)
             {
@@ -539,9 +545,9 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,0,1)
-            double dx2 = dx3;
-            double dy2 = dy0 - 0 - 2 * m_squish3d;
-            double dz2 = dz0 - 1 - 2 * m_squish3d;
+            const double dx2 = dx3;
+            const double dy2 = dy0 - 0 - 2 * m_squish3d;
+            const double dz2 = dz0 - 1 - 2 * m_squish3d;
             double attn2 = 2 - dx2 * dx2 - dy2 * dy2 - dz2 * dz2;
             if (attn2 > 0)
             {
@@ -550,9 +556,9 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,1,1)
-            double dx1 = dx0 - 0 - 2 * m_squish3d;
-            double dy1 = dy3;
-            double dz1 = dz2;
+            const double dx1 = dx0 - 0 - 2 * m_squish3d;
+            const double dy1 = dy3;
+            const double dz1 = dz2;
             double attn1 = 2 - dx1 * dx1 - dy1 * dy1 - dz1 * dz1;
             if (attn1 > 0)
             {
@@ -581,7 +587,7 @@ namespace OpenSimplexNoise
             bool bIsFurtherSide;
 
             //Decide between point (0,0,1) and (1,1,0) as closest
-            double p1 = xins + yins;
+            const double p1 = xins + yins;
             if (p1 > 1)
             {
                 aScore = p1 - 1;
@@ -596,7 +602,7 @@ namespace OpenSimplexNoise
             }
 
             //Decide between point (0,1,0) and (1,0,1) as closest
-            double p2 = xins + zins;
+            const double p2 = xins + zins;
             if (p2 > 1)
             {
                 bScore = p2 - 1;
@@ -611,10 +617,10 @@ namespace OpenSimplexNoise
             }
 
             //The closest out of the two (1,0,0) and (0,1,1) will replace the furthest out of the two decided above, if closer.
-            double p3 = yins + zins;
+            const double p3 = yins + zins;
             if (p3 > 1)
             {
-                double score = p3 - 1;
+                const double score = p3 - 1;
                 if (aScore <= bScore && aScore < score)
                 {
                     aScore = score;
@@ -630,7 +636,7 @@ namespace OpenSimplexNoise
             }
             else
             {
-                double score = 1 - p3;
+                const double score = 1 - p3;
                 if (aScore <= bScore && aScore < score)
                 {
                     aScore = score;
@@ -660,7 +666,7 @@ namespace OpenSimplexNoise
                     zsv_ext0 = zsb + 1;
 
                     //Other extra point is based on the shared axis.
-                    char c = static_cast<char>(aPoint & bPoint);
+                    const char c = static_cast<char>(aPoint & bPoint);
                     if ((c & 0x01) != 0)
                     {
                         dx_ext1 = dx0 - 2 - 2 * m_squish3d;
@@ -701,7 +707,7 @@ namespace OpenSimplexNoise
                     zsv_ext0 = zsb;
 
                     //Other extra point is based on the omitted axis.
-                    char c = static_cast<char>(aPoint | bPoint);
+                    const char c = static_cast<char>(aPoint | bPoint);
                     if ((c & 0x01) == 0)
                     {
                         dx_ext1 = dx0 + 1 - m_squish3d;
@@ -799,9 +805,9 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,0,0)
-            double dx1 = dx0 - 1 - m_squish3d;
-            double dy1 = dy0 - 0 - m_squish3d;
-            double dz1 = dz0 - 0 - m_squish3d;
+            const double dx1 = dx0 - 1 - m_squish3d;
+            const double dy1 = dy0 - 0 - m_squish3d;
+            const double dz1 = dz0 - 0 - m_squish3d;
             double attn1 = 2 - dx1 * dx1 - dy1 * dy1 - dz1 * dz1;
             if (attn1 > 0)
             {
@@ -810,9 +816,9 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,1,0)
-            double dx2 = dx0 - 0 - m_squish3d;
-            double dy2 = dy0 - 1 - m_squish3d;
-            double dz2 = dz1;
+            const double dx2 = dx0 - 0 - m_squish3d;
+            const double dy2 = dy0 - 1 - m_squish3d;
+            const double dz2 = dz1;
             double attn2 = 2 - dx2 * dx2 - dy2 * dy2 - dz2 * dz2;
             if (attn2 > 0)
             {
@@ -821,9 +827,9 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,0,1)
-            double dx3 = dx2;
-            double dy3 = dy1;
-            double dz3 = dz0 - 1 - m_squish3d;
+            const double dx3 = dx2;
+            const double dy3 = dy1;
+            const double dz3 = dz0 - 1 - m_squish3d;
             double attn3 = 2 - dx3 * dx3 - dy3 * dy3 - dz3 * dz3;
             if (attn3 > 0)
             {
@@ -832,9 +838,9 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,1,0)
-            double dx4 = dx0 - 1 - 2 * m_squish3d;
-            double dy4 = dy0 - 1 - 2 * m_squish3d;
-            double dz4 = dz0 - 0 - 2 * m_squish3d;
+            const double dx4 = dx0 - 1 - 2 * m_squish3d;
+            const double dy4 = dy0 - 1 - 2 * m_squish3d;
+            const double dz4 = dz0 - 0 - 2 * m_squish3d;
             double attn4 = 2 - dx4 * dx4 - dy4 * dy4 - dz4 * dz4;
             if (attn4 > 0)
             {
@@ -843,9 +849,9 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,0,1)
-            double dx5 = dx4;
-            double dy5 = dy0 - 0 - 2 * m_squish3d;
-            double dz5 = dz0 - 1 - 2 * m_squish3d;
+            const double dx5 = dx4;
+            const double dy5 = dy0 - 0 - 2 * m_squish3d;
+            const double dz5 = dz0 - 1 - 2 * m_squish3d;
             double attn5 = 2 - dx5 * dx5 - dy5 * dy5 - dz5 * dz5;
             if (attn5 > 0)
             {
@@ -854,9 +860,9 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,1,1)
-            double dx6 = dx0 - 0 - 2 * m_squish3d;
-            double dy6 = dy4;
-            double dz6 = dz5;
+            const double dx6 = dx0 - 0 - 2 * m_squish3d;
+            const double dy6 = dy4;
+            const double dz6 = dz5;
             double attn6 = 2 - dx6 * dx6 - dy6 * dy6 - dz6 * dz6;
             if (attn6 > 0)
             {
@@ -887,33 +893,33 @@ namespace OpenSimplexNoise
     double Noise::eval(double x, double y, double z, double w) const
     {
         //Place input coordinates on simplectic honeycomb.
-        double stretchOffset = (x + y + z + w) * m_stretch4d;
-        double xs = x + stretchOffset;
-        double ys = y + stretchOffset;
-        double zs = z + stretchOffset;
-        double ws = w + stretchOffset;
+        const double stretchOffset = (x + y + z + w) * m_stretch4d;
+        const double xs = x + stretchOffset;
+        const double ys = y + stretchOffset;
+        const double zs = z + stretchOffset;
+        const double ws = w + stretchOffset;
 
         //static_cast<int>(floor to get simplectic honeycomb coordinates of rhombo-hypercube super-cell origin.
-        int xsb = static_cast<int>(floor(xs));
-        int ysb = static_cast<int>(floor(ys));
-        int zsb = static_cast<int>(floor(zs));
-        int wsb = static_cast<int>(floor(ws));
+        const int xsb = static_cast<int>(floor(xs));
+        const int ysb = static_cast<int>(floor(ys));
+        const int zsb = static_cast<int>(floor(zs));
+        const int wsb = static_cast<int>(floor(ws));
 
         //Skew out to get actual coordinates of stretched rhombo-hypercube origin. We'll need these later.
-        double squishOffset = (xsb + ysb + zsb + wsb) * m_squish4d;
-        double xb = xsb + squishOffset;
-        double yb = ysb + squishOffset;
-        double zb = zsb + squishOffset;
-        double wb = wsb + squishOffset;
+        const double squishOffset = (xsb + ysb + zsb + wsb) * m_squish4d;
+        const double xb = xsb + squishOffset;
+        const double yb = ysb + squishOffset;
+        const double zb = zsb + squishOffset;
+        const double wb = wsb + squishOffset;
 
         //Compute simplectic honeycomb coordinates relative to rhombo-hypercube origin.
-        double xins = xs - xsb;
-        double yins = ys - ysb;
-        double zins = zs - zsb;
-        double wins = ws - wsb;
+        const double xins = xs - xsb;
+        const double yins = ys - ysb;
+        const double zins = zs - zsb;
+        const double wins = ws - wsb;
 
         //Sum those together to get a value that determines which region we're in.
-        double inSum = xins + yins + zins + wins;
+        const double inSum = xins + yins + zins + wins;
 
         //Positions relative to origin point.
         double dx0 = x - xb;
@@ -961,10 +967,10 @@ namespace OpenSimplexNoise
 
             //Now we determine the three lattice points not part of the pentachoron that may contribute.
             //This depends on the closest two pentachoron vertices, including (0,0,0,0)
-            double uins = 1 - inSum;
+            const double uins = 1 - inSum;
             if (uins > aScore || uins > bScore)
             { //(0,0,0,0) is one of the closest two pentachoron vertices.
-                char c = (bScore > aScore ? bPoint : aPoint); //Our other closest vertex is the closest out of a and b.
+                const char c = (bScore > aScore ? bPoint : aPoint); //Our other closest vertex is the closest out of a and b.
                 if ((c & 0x01) == 0)
                 {
                     xsv_ext0 = xsb - 1;
@@ -1043,7 +1049,7 @@ namespace OpenSimplexNoise
             }
             else
             { //(0,0,0,0) is not one of the closest two pentachoron vertices.
-                char c = static_cast<char>(aPoint | bPoint); //Our three extra vertices are determined by the closest two.
+                const char c = static_cast<char>(aPoint | bPoint); //Our three extra vertices are determined by the closest two.
 
                 if ((c & 0x01) == 0)
                 {
@@ -1131,10 +1137,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,0,0,0)
-            double dx1 = dx0 - 1 - m_squish4d;
-            double dy1 = dy0 - 0 - m_squish4d;
-            double dz1 = dz0 - 0 - m_squish4d;
-            double dw1 = dw0 - 0 - m_squish4d;
+            const double dx1 = dx0 - 1 - m_squish4d;
+            const double dy1 = dy0 - 0 - m_squish4d;
+            const double dz1 = dz0 - 0 - m_squish4d;
+            const double dw1 = dw0 - 0 - m_squish4d;
             double attn1 = 2 - dx1 * dx1 - dy1 * dy1 - dz1 * dz1 - dw1 * dw1;
             if (attn1 > 0)
             {
@@ -1143,10 +1149,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,1,0,0)
-            double dx2 = dx0 - 0 - m_squish4d;
-            double dy2 = dy0 - 1 - m_squish4d;
-            double dz2 = dz1;
-            double dw2 = dw1;
+            const double dx2 = dx0 - 0 - m_squish4d;
+            const double dy2 = dy0 - 1 - m_squish4d;
+            const double dz2 = dz1;
+            const double dw2 = dw1;
             double attn2 = 2 - dx2 * dx2 - dy2 * dy2 - dz2 * dz2 - dw2 * dw2;
             if (attn2 > 0)
             {
@@ -1155,10 +1161,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,0,1,0)
-            double dx3 = dx2;
-            double dy3 = dy1;
-            double dz3 = dz0 - 1 - m_squish4d;
-            double dw3 = dw1;
+            const double dx3 = dx2;
+            const double dy3 = dy1;
+            const double dz3 = dz0 - 1 - m_squish4d;
+            const double dw3 = dw1;
             double attn3 = 2 - dx3 * dx3 - dy3 * dy3 - dz3 * dz3 - dw3 * dw3;
             if (attn3 > 0)
             {
@@ -1167,10 +1173,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,0,0,1)
-            double dx4 = dx2;
-            double dy4 = dy1;
-            double dz4 = dz1;
-            double dw4 = dw0 - 1 - m_squish4d;
+            const double dx4 = dx2;
+            const double dy4 = dy1;
+            const double dz4 = dz1;
+            const double dw4 = dw0 - 1 - m_squish4d;
             double attn4 = 2 - dx4 * dx4 - dy4 * dy4 - dz4 * dz4 - dw4 * dw4;
             if (attn4 > 0)
             {
@@ -1211,7 +1217,7 @@ namespace OpenSimplexNoise
             double uins = 4 - inSum;
             if (uins < aScore || uins < bScore)
             { //(1,1,1,1) is one of the closest two pentachoron vertices.
-                char c = (bScore < aScore ? bPoint : aPoint); //Our other closest vertex is the closest out of a and b.
+                const char c = (bScore < aScore ? bPoint : aPoint); //Our other closest vertex is the closest out of a and b.
 
                 if ((c & 0x01) != 0)
                 {
@@ -1291,7 +1297,7 @@ namespace OpenSimplexNoise
             }
             else
             { //(1,1,1,1) is not one of the closest two pentachoron vertices.
-                char c = static_cast<char>(aPoint & bPoint); //Our three extra vertices are determined by the closest two.
+                const char c = static_cast<char>(aPoint & bPoint); //Our three extra vertices are determined by the closest two.
 
                 if ((c & 0x01) != 0)
                 {
@@ -1371,10 +1377,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,1,1,0)
-            double dx4 = dx0 - 1 - 3 * m_squish4d;
-            double dy4 = dy0 - 1 - 3 * m_squish4d;
-            double dz4 = dz0 - 1 - 3 * m_squish4d;
-            double dw4 = dw0 - 3 * m_squish4d;
+            const double dx4 = dx0 - 1 - 3 * m_squish4d;
+            const double dy4 = dy0 - 1 - 3 * m_squish4d;
+            const double dz4 = dz0 - 1 - 3 * m_squish4d;
+            const double dw4 = dw0 - 3 * m_squish4d;
             double attn4 = 2 - dx4 * dx4 - dy4 * dy4 - dz4 * dz4 - dw4 * dw4;
             if (attn4 > 0)
             {
@@ -1383,10 +1389,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,1,0,1)
-            double dx3 = dx4;
-            double dy3 = dy4;
-            double dz3 = dz0 - 3 * m_squish4d;
-            double dw3 = dw0 - 1 - 3 * m_squish4d;
+            const double dx3 = dx4;
+            const double dy3 = dy4;
+            const double dz3 = dz0 - 3 * m_squish4d;
+            const double dw3 = dw0 - 1 - 3 * m_squish4d;
             double attn3 = 2 - dx3 * dx3 - dy3 * dy3 - dz3 * dz3 - dw3 * dw3;
             if (attn3 > 0)
             {
@@ -1395,10 +1401,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,0,1,1)
-            double dx2 = dx4;
-            double dy2 = dy0 - 3 * m_squish4d;
-            double dz2 = dz4;
-            double dw2 = dw3;
+            const double dx2 = dx4;
+            const double dy2 = dy0 - 3 * m_squish4d;
+            const double dz2 = dz4;
+            const double dw2 = dw3;
             double attn2 = 2 - dx2 * dx2 - dy2 * dy2 - dz2 * dz2 - dw2 * dw2;
             if (attn2 > 0)
             {
@@ -1407,10 +1413,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,1,1,1)
-            double dx1 = dx0 - 3 * m_squish4d;
-            double dz1 = dz4;
-            double dy1 = dy4;
-            double dw1 = dw3;
+            const double dx1 = dx0 - 3 * m_squish4d;
+            const double dz1 = dz4;
+            const double dy1 = dy4;
+            const double dw1 = dw3;
             double attn1 = 2 - dx1 * dx1 - dy1 * dy1 - dz1 * dz1 - dw1 * dw1;
             if (attn1 > 0)
             {
@@ -1466,7 +1472,7 @@ namespace OpenSimplexNoise
             //Closer between (1,0,0,1) and (0,1,1,0) will replace the further of a and b, if closer.
             if (xins + wins > yins + zins)
             {
-                double score = xins + wins;
+                const double score = xins + wins;
                 if (aScore >= bScore && score > bScore)
                 {
                     bScore = score;
@@ -1480,7 +1486,7 @@ namespace OpenSimplexNoise
             }
             else
             {
-                double score = yins + zins;
+                const double score = yins + zins;
                 if (aScore >= bScore && score > bScore)
                 {
                     bScore = score;
@@ -1494,7 +1500,7 @@ namespace OpenSimplexNoise
             }
 
             //Decide if (1,0,0,0) is closer.
-            double p1 = 2 - inSum + xins;
+            const double p1 = 2 - inSum + xins;
             if (aScore >= bScore && p1 > bScore)
             {
                 bScore = p1;
@@ -1509,7 +1515,7 @@ namespace OpenSimplexNoise
             }
 
             //Decide if (0,1,0,0) is closer.
-            double p2 = 2 - inSum + yins;
+            const double p2 = 2 - inSum + yins;
             if (aScore >= bScore && p2 > bScore)
             {
                 bScore = p2;
@@ -1524,7 +1530,7 @@ namespace OpenSimplexNoise
             }
 
             //Decide if (0,0,1,0) is closer.
-            double p3 = 2 - inSum + zins;
+            const double p3 = 2 - inSum + zins;
             if (aScore >= bScore && p3 > bScore)
             {
                 bScore = p3;
@@ -1539,7 +1545,7 @@ namespace OpenSimplexNoise
             }
 
             //Decide if (0,0,0,1) is closer.
-            double p4 = 2 - inSum + wins;
+            const double p4 = 2 - inSum + wins;
             if (aScore >= bScore && p4 > bScore)
             {
                 bScore = p4;
@@ -1558,8 +1564,8 @@ namespace OpenSimplexNoise
             {
                 if (aIsBiggerSide)
                 { //Both closest points on the bigger side
-                    char c1 = static_cast<char>(aPoint | bPoint);
-                    char c2 = static_cast<char>(aPoint & bPoint);
+                    const char c1 = static_cast<char>(aPoint | bPoint);
+                    const char c2 = static_cast<char>(aPoint & bPoint);
                     if ((c1 & 0x01) == 0)
                     {
                         xsv_ext0 = xsb;
@@ -1660,7 +1666,7 @@ namespace OpenSimplexNoise
                     dw_ext2 = dw0;
 
                     //Other two points are based on the omitted axes.
-                    char c = static_cast<char>(aPoint | bPoint);
+                    const char c = static_cast<char>(aPoint | bPoint);
 
                     if ((c & 0x01) == 0)
                     {
@@ -1847,10 +1853,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,0,0,0)
-            double dx1 = dx0 - 1 - m_squish4d;
-            double dy1 = dy0 - 0 - m_squish4d;
-            double dz1 = dz0 - 0 - m_squish4d;
-            double dw1 = dw0 - 0 - m_squish4d;
+            const double dx1 = dx0 - 1 - m_squish4d;
+            const double dy1 = dy0 - 0 - m_squish4d;
+            const double dz1 = dz0 - 0 - m_squish4d;
+            const double dw1 = dw0 - 0 - m_squish4d;
             double attn1 = 2 - dx1 * dx1 - dy1 * dy1 - dz1 * dz1 - dw1 * dw1;
             if (attn1 > 0)
             {
@@ -1859,10 +1865,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,1,0,0)
-            double dx2 = dx0 - 0 - m_squish4d;
-            double dy2 = dy0 - 1 - m_squish4d;
-            double dz2 = dz1;
-            double dw2 = dw1;
+            const double dx2 = dx0 - 0 - m_squish4d;
+            const double dy2 = dy0 - 1 - m_squish4d;
+            const double dz2 = dz1;
+            const double dw2 = dw1;
             double attn2 = 2 - dx2 * dx2 - dy2 * dy2 - dz2 * dz2 - dw2 * dw2;
             if (attn2 > 0)
             {
@@ -1871,10 +1877,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,0,1,0)
-            double dx3 = dx2;
-            double dy3 = dy1;
-            double dz3 = dz0 - 1 - m_squish4d;
-            double dw3 = dw1;
+            const double dx3 = dx2;
+            const double dy3 = dy1;
+            const double dz3 = dz0 - 1 - m_squish4d;
+            const double dw3 = dw1;
             double attn3 = 2 - dx3 * dx3 - dy3 * dy3 - dz3 * dz3 - dw3 * dw3;
             if (attn3 > 0)
             {
@@ -1883,10 +1889,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,0,0,1)
-            double dx4 = dx2;
-            double dy4 = dy1;
-            double dz4 = dz1;
-            double dw4 = dw0 - 1 - m_squish4d;
+            const double dx4 = dx2;
+            const double dy4 = dy1;
+            const double dz4 = dz1;
+            const double dw4 = dw0 - 1 - m_squish4d;
             double attn4 = 2 - dx4 * dx4 - dy4 * dy4 - dz4 * dz4 - dw4 * dw4;
             if (attn4 > 0)
             {
@@ -1895,10 +1901,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,1,0,0)
-            double dx5 = dx0 - 1 - 2 * m_squish4d;
-            double dy5 = dy0 - 1 - 2 * m_squish4d;
-            double dz5 = dz0 - 0 - 2 * m_squish4d;
-            double dw5 = dw0 - 0 - 2 * m_squish4d;
+            const double dx5 = dx0 - 1 - 2 * m_squish4d;
+            const double dy5 = dy0 - 1 - 2 * m_squish4d;
+            const double dz5 = dz0 - 0 - 2 * m_squish4d;
+            const double dw5 = dw0 - 0 - 2 * m_squish4d;
             double attn5 = 2 - dx5 * dx5 - dy5 * dy5 - dz5 * dz5 - dw5 * dw5;
             if (attn5 > 0)
             {
@@ -1907,10 +1913,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,0,1,0)
-            double dx6 = dx0 - 1 - 2 * m_squish4d;
-            double dy6 = dy0 - 0 - 2 * m_squish4d;
-            double dz6 = dz0 - 1 - 2 * m_squish4d;
-            double dw6 = dw0 - 0 - 2 * m_squish4d;
+            const double dx6 = dx0 - 1 - 2 * m_squish4d;
+            const double dy6 = dy0 - 0 - 2 * m_squish4d;
+            const double dz6 = dz0 - 1 - 2 * m_squish4d;
+            const double dw6 = dw0 - 0 - 2 * m_squish4d;
             double attn6 = 2 - dx6 * dx6 - dy6 * dy6 - dz6 * dz6 - dw6 * dw6;
             if (attn6 > 0)
             {
@@ -1919,10 +1925,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,0,0,1)
-            double dx7 = dx0 - 1 - 2 * m_squish4d;
-            double dy7 = dy0 - 0 - 2 * m_squish4d;
-            double dz7 = dz0 - 0 - 2 * m_squish4d;
-            double dw7 = dw0 - 1 - 2 * m_squish4d;
+            const double dx7 = dx0 - 1 - 2 * m_squish4d;
+            const double dy7 = dy0 - 0 - 2 * m_squish4d;
+            const double dz7 = dz0 - 0 - 2 * m_squish4d;
+            const double dw7 = dw0 - 1 - 2 * m_squish4d;
             double attn7 = 2 - dx7 * dx7 - dy7 * dy7 - dz7 * dz7 - dw7 * dw7;
             if (attn7 > 0)
             {
@@ -1931,10 +1937,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,1,1,0)
-            double dx8 = dx0 - 0 - 2 * m_squish4d;
-            double dy8 = dy0 - 1 - 2 * m_squish4d;
-            double dz8 = dz0 - 1 - 2 * m_squish4d;
-            double dw8 = dw0 - 0 - 2 * m_squish4d;
+            const double dx8 = dx0 - 0 - 2 * m_squish4d;
+            const double dy8 = dy0 - 1 - 2 * m_squish4d;
+            const double dz8 = dz0 - 1 - 2 * m_squish4d;
+            const double dw8 = dw0 - 0 - 2 * m_squish4d;
             double attn8 = 2 - dx8 * dx8 - dy8 * dy8 - dz8 * dz8 - dw8 * dw8;
             if (attn8 > 0)
             {
@@ -1943,10 +1949,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,1,0,1)
-            double dx9 = dx0 - 0 - 2 * m_squish4d;
-            double dy9 = dy0 - 1 - 2 * m_squish4d;
-            double dz9 = dz0 - 0 - 2 * m_squish4d;
-            double dw9 = dw0 - 1 - 2 * m_squish4d;
+            const double dx9 = dx0 - 0 - 2 * m_squish4d;
+            const double dy9 = dy0 - 1 - 2 * m_squish4d;
+            const double dz9 = dz0 - 0 - 2 * m_squish4d;
+            const double dw9 = dw0 - 1 - 2 * m_squish4d;
             double attn9 = 2 - dx9 * dx9 - dy9 * dy9 - dz9 * dz9 - dw9 * dw9;
             if (attn9 > 0)
             {
@@ -1955,10 +1961,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,0,1,1)
-            double dx10 = dx0 - 0 - 2 * m_squish4d;
-            double dy10 = dy0 - 0 - 2 * m_squish4d;
-            double dz10 = dz0 - 1 - 2 * m_squish4d;
-            double dw10 = dw0 - 1 - 2 * m_squish4d;
+            const double dx10 = dx0 - 0 - 2 * m_squish4d;
+            const double dy10 = dy0 - 0 - 2 * m_squish4d;
+            const double dz10 = dz0 - 1 - 2 * m_squish4d;
+            const double dw10 = dw0 - 1 - 2 * m_squish4d;
             double attn10 = 2 - dx10 * dx10 - dy10 * dy10 - dz10 * dz10 - dw10 * dw10;
             if (attn10 > 0)
             {
@@ -2002,7 +2008,7 @@ namespace OpenSimplexNoise
             //Closer between (0,1,1,0) and (1,0,0,1) will replace the further of a and b, if closer.
             if (xins + wins < yins + zins)
             {
-                double score = xins + wins;
+                const double score = xins + wins;
                 if (aScore <= bScore && score < bScore)
                 {
                     bScore = score;
@@ -2016,7 +2022,7 @@ namespace OpenSimplexNoise
             }
             else
             {
-                double score = yins + zins;
+                const double score = yins + zins;
                 if (aScore <= bScore && score < bScore)
                 {
                     bScore = score;
@@ -2030,7 +2036,7 @@ namespace OpenSimplexNoise
             }
 
             //Decide if (0,1,1,1) is closer.
-            double p1 = 3 - inSum + xins;
+            const double p1 = 3 - inSum + xins;
             if (aScore <= bScore && p1 < bScore)
             {
                 bScore = p1;
@@ -2045,7 +2051,7 @@ namespace OpenSimplexNoise
             }
 
             //Decide if (1,0,1,1) is closer.
-            double p2 = 3 - inSum + yins;
+            const double p2 = 3 - inSum + yins;
             if (aScore <= bScore && p2 < bScore)
             {
                 bScore = p2;
@@ -2060,7 +2066,7 @@ namespace OpenSimplexNoise
             }
 
             //Decide if (1,1,0,1) is closer.
-            double p3 = 3 - inSum + zins;
+            const double p3 = 3 - inSum + zins;
             if (aScore <= bScore && p3 < bScore)
             {
                 bScore = p3;
@@ -2075,7 +2081,7 @@ namespace OpenSimplexNoise
             }
 
             //Decide if (1,1,1,0) is closer.
-            double p4 = 3 - inSum + wins;
+            const double p4 = 3 - inSum + wins;
             if (aScore <= bScore && p4 < bScore)
             {
                 bScore = p4;
@@ -2094,8 +2100,8 @@ namespace OpenSimplexNoise
             {
                 if (aIsBiggerSide)
                 { //Both closest points on the bigger side
-                    char c1 = static_cast<char>(aPoint & bPoint);
-                    char c2 = static_cast<char>(aPoint | bPoint);
+                    const char c1 = static_cast<char>(aPoint & bPoint);
+                    const char c2 = static_cast<char>(aPoint | bPoint);
 
                     //Two contributions are permutations of (0,0,0,1) and (0,0,0,2) based on c1
                     xsv_ext0 = xsv_ext1 = xsb;
@@ -2182,7 +2188,7 @@ namespace OpenSimplexNoise
                     dw_ext2 = dw0 - 1 - 4 * m_squish4d;
 
                     //Other two points are based on the shared axes.
-                    char c = static_cast<char>(aPoint & bPoint);
+                    const char c = static_cast<char>(aPoint & bPoint);
 
                     if ((c & 0x01) != 0)
                     {
@@ -2368,10 +2374,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,1,1,0)
-            double dx4 = dx0 - 1 - 3 * m_squish4d;
-            double dy4 = dy0 - 1 - 3 * m_squish4d;
-            double dz4 = dz0 - 1 - 3 * m_squish4d;
-            double dw4 = dw0 - 3 * m_squish4d;
+            const double dx4 = dx0 - 1 - 3 * m_squish4d;
+            const double dy4 = dy0 - 1 - 3 * m_squish4d;
+            const double dz4 = dz0 - 1 - 3 * m_squish4d;
+            const double dw4 = dw0 - 3 * m_squish4d;
             double attn4 = 2 - dx4 * dx4 - dy4 * dy4 - dz4 * dz4 - dw4 * dw4;
             if (attn4 > 0)
             {
@@ -2380,10 +2386,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,1,0,1)
-            double dx3 = dx4;
-            double dy3 = dy4;
-            double dz3 = dz0 - 3 * m_squish4d;
-            double dw3 = dw0 - 1 - 3 * m_squish4d;
+            const double dx3 = dx4;
+            const double dy3 = dy4;
+            const double dz3 = dz0 - 3 * m_squish4d;
+            const double dw3 = dw0 - 1 - 3 * m_squish4d;
             double attn3 = 2 - dx3 * dx3 - dy3 * dy3 - dz3 * dz3 - dw3 * dw3;
             if (attn3 > 0)
             {
@@ -2392,10 +2398,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,0,1,1)
-            double dx2 = dx4;
-            double dy2 = dy0 - 3 * m_squish4d;
-            double dz2 = dz4;
-            double dw2 = dw3;
+            const double dx2 = dx4;
+            const double dy2 = dy0 - 3 * m_squish4d;
+            const double dz2 = dz4;
+            const double dw2 = dw3;
             double attn2 = 2 - dx2 * dx2 - dy2 * dy2 - dz2 * dz2 - dw2 * dw2;
             if (attn2 > 0)
             {
@@ -2404,10 +2410,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,1,1,1)
-            double dx1 = dx0 - 3 * m_squish4d;
-            double dz1 = dz4;
-            double dy1 = dy4;
-            double dw1 = dw3;
+            const double dx1 = dx0 - 3 * m_squish4d;
+            const double dz1 = dz4;
+            const double dy1 = dy4;
+            const double dw1 = dw3;
             double attn1 = 2 - dx1 * dx1 - dy1 * dy1 - dz1 * dz1 - dw1 * dw1;
             if (attn1 > 0)
             {
@@ -2416,10 +2422,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,1,0,0)
-            double dx5 = dx0 - 1 - 2 * m_squish4d;
-            double dy5 = dy0 - 1 - 2 * m_squish4d;
-            double dz5 = dz0 - 0 - 2 * m_squish4d;
-            double dw5 = dw0 - 0 - 2 * m_squish4d;
+            const double dx5 = dx0 - 1 - 2 * m_squish4d;
+            const double dy5 = dy0 - 1 - 2 * m_squish4d;
+            const double dz5 = dz0 - 0 - 2 * m_squish4d;
+            const double dw5 = dw0 - 0 - 2 * m_squish4d;
             double attn5 = 2 - dx5 * dx5 - dy5 * dy5 - dz5 * dz5 - dw5 * dw5;
             if (attn5 > 0)
             {
@@ -2428,10 +2434,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,0,1,0)
-            double dx6 = dx0 - 1 - 2 * m_squish4d;
-            double dy6 = dy0 - 0 - 2 * m_squish4d;
-            double dz6 = dz0 - 1 - 2 * m_squish4d;
-            double dw6 = dw0 - 0 - 2 * m_squish4d;
+            const double dx6 = dx0 - 1 - 2 * m_squish4d;
+            const double dy6 = dy0 - 0 - 2 * m_squish4d;
+            const double dz6 = dz0 - 1 - 2 * m_squish4d;
+            const double dw6 = dw0 - 0 - 2 * m_squish4d;
             double attn6 = 2 - dx6 * dx6 - dy6 * dy6 - dz6 * dz6 - dw6 * dw6;
             if (attn6 > 0)
             {
@@ -2440,10 +2446,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (1,0,0,1)
-            double dx7 = dx0 - 1 - 2 * m_squish4d;
-            double dy7 = dy0 - 0 - 2 * m_squish4d;
-            double dz7 = dz0 - 0 - 2 * m_squish4d;
-            double dw7 = dw0 - 1 - 2 * m_squish4d;
+            const double dx7 = dx0 - 1 - 2 * m_squish4d;
+            const double dy7 = dy0 - 0 - 2 * m_squish4d;
+            const double dz7 = dz0 - 0 - 2 * m_squish4d;
+            const double dw7 = dw0 - 1 - 2 * m_squish4d;
             double attn7 = 2 - dx7 * dx7 - dy7 * dy7 - dz7 * dz7 - dw7 * dw7;
             if (attn7 > 0)
             {
@@ -2452,10 +2458,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,1,1,0)
-            double dx8 = dx0 - 0 - 2 * m_squish4d;
-            double dy8 = dy0 - 1 - 2 * m_squish4d;
-            double dz8 = dz0 - 1 - 2 * m_squish4d;
-            double dw8 = dw0 - 0 - 2 * m_squish4d;
+            const double dx8 = dx0 - 0 - 2 * m_squish4d;
+            const double dy8 = dy0 - 1 - 2 * m_squish4d;
+            const double dz8 = dz0 - 1 - 2 * m_squish4d;
+            const double dw8 = dw0 - 0 - 2 * m_squish4d;
             double attn8 = 2 - dx8 * dx8 - dy8 * dy8 - dz8 * dz8 - dw8 * dw8;
             if (attn8 > 0)
             {
@@ -2464,10 +2470,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,1,0,1)
-            double dx9 = dx0 - 0 - 2 * m_squish4d;
-            double dy9 = dy0 - 1 - 2 * m_squish4d;
-            double dz9 = dz0 - 0 - 2 * m_squish4d;
-            double dw9 = dw0 - 1 - 2 * m_squish4d;
+            const double dx9 = dx0 - 0 - 2 * m_squish4d;
+            const double dy9 = dy0 - 1 - 2 * m_squish4d;
+            const double dz9 = dz0 - 0 - 2 * m_squish4d;
+            const double dw9 = dw0 - 1 - 2 * m_squish4d;
             double attn9 = 2 - dx9 * dx9 - dy9 * dy9 - dz9 * dz9 - dw9 * dw9;
             if (attn9 > 0)
             {
@@ -2476,10 +2482,10 @@ namespace OpenSimplexNoise
             }
 
             //Contribution (0,0,1,1)
-            double dx10 = dx0 - 0 - 2 * m_squish4d;
-            double dy10 = dy0 - 0 - 2 * m_squish4d;
-            double dz10 = dz0 - 1 - 2 * m_squish4d;
-            double dw10 = dw0 - 1 - 2 * m_squish4d;
+            const double dx10 = dx0 - 0 - 2 * m_squish4d;
+            const double dy10 = dy0 - 0 - 2 * m_squish4d;
+            const double dz10 = dz0 - 1 - 2 * m_squish4d;
+            const double dw10 = dw0 - 1 - 2 * m_squish4d;
             double attn10 = 2 - dx10 * dx10 - dy10 * dy10 - dz10 * dz10 - dw10 * dw10;
             if (attn10 > 0)
             {
@@ -2515,24 +2521,24 @@ namespace OpenSimplexNoise
         return value / m_norm4d;
     }
 
-    double Noise::extrapolate(int xsb, int ysb, double dx, double dy) const
+    FORCE_INLINE double Noise::extrapolate(int xsb, int ysb, double dx, double dy) const
     {
-        int index = m_perm[(m_perm[xsb & 0xFF] + ysb) & 0xFF] & 0x0E;
+        const int index = m_perm[(m_perm[xsb & 0xFF] + ysb) & 0xFF] & 0x0E;
         return m_gradients2d[index] * dx
             + m_gradients2d[index + 1] * dy;
     }
 
-    double Noise::extrapolate(int xsb, int ysb, int zsb, double dx, double dy, double dz) const
+    FORCE_INLINE double Noise::extrapolate(int xsb, int ysb, int zsb, double dx, double dy, double dz) const
     {
-        int index = m_permGradIndex3d[(m_perm[(m_perm[xsb & 0xFF] + ysb) & 0xFF] + zsb) & 0xFF];
+        const int index = m_permGradIndex3d[(m_perm[(m_perm[xsb & 0xFF] + ysb) & 0xFF] + zsb) & 0xFF];
         return m_gradients3d[index] * dx
             + m_gradients3d[index + 1] * dy
             + m_gradients3d[index + 2] * dz;
     }
 
-    double Noise::extrapolate(int xsb, int ysb, int zsb, int wsb, double dx, double dy, double dz, double dw) const
+    FORCE_INLINE double Noise::extrapolate(int xsb, int ysb, int zsb, int wsb, double dx, double dy, double dz, double dw) const
     {
-        int index = m_perm[(m_perm[(m_perm[(m_perm[xsb & 0xFF] + ysb) & 0xFF] + zsb) & 0xFF] + wsb) & 0xFF] & 0xFC;
+        const int index = m_perm[(m_perm[(m_perm[(m_perm[xsb & 0xFF] + ysb) & 0xFF] + zsb) & 0xFF] + wsb) & 0xFF] & 0xFC;
         return m_gradients4d[index] * dx
             + m_gradients4d[index + 1] * dy
             + m_gradients4d[index + 2] * dz
@@ -2544,88 +2550,65 @@ namespace OpenSimplexNoise
 #define func extern "C" __declspec(dllexport)
 
 template <typename Func>
-inline double open_simplex_fractal(Func eval, double amplitude, double octaves)
+inline double open_simplex_fractal(Func&& eval, double amplitude, int octaves)
 {
     double total = 0.0;
-    double max = 0.0;
+    double max_amp = 0.0;
+    double frequency = 1.0;
+    double amp = 1.0;
 
-    double f = 1.0;
-    double a = 1.0;
-
-#pragma omp parallel for
+    // Unroll first few iterations for better performance
     for (int i = 0; i < octaves; ++i)
     {
-        total += eval(f) * a;
-        max += a;
-
-        a *= 0.5;
-        f *= 2.0;
+        total += eval(frequency) * amp;
+        max_amp += amp;
+        amp *= 0.5;
+        frequency *= 2.0;
     }
 
-    return ((total / max) + 1.0) * (amplitude * 0.5);
+    return ((total / max_amp) + 1.0) * (amplitude * 0.5);
 }
 
-static OpenSimplexNoise::Noise* g_noise = nullptr;
-
-func double open_simplex_noise_free()
-{
-    if (g_noise)
-    {
-        delete g_noise;
-
-        g_noise = nullptr;
-    }
-
-    return 0;
-}
+static OpenSimplexNoise::Noise g_noise(0);
 
 func double open_simplex_noise_seed(double seed)
 {
-    open_simplex_noise_free();
-    
-    g_noise = new OpenSimplexNoise::Noise((int64_t)seed);
+    g_noise.~Noise();
+
+    new (&g_noise) OpenSimplexNoise::Noise(static_cast<int64_t>(seed));
     
     return seed;
 }
 
 func double open_simplex_noise(double x, double y, double amplitude, double octaves)
 {
-    if (!g_noise)
-    {
-        g_noise = new OpenSimplexNoise::Noise(0);
-    }
+    const int oct = static_cast<int>(octaves);
 
     return open_simplex_fractal(
-        [&](double f) { return g_noise->eval(x * f, y * f); },
+        [&](double f) { return g_noise.eval(x * f, y * f); },
         amplitude,
-        octaves
+        oct
     );
 }
 
 func double open_simplex_noise_3d(double x, double y, double z, double amplitude, double octaves)
 {
-    if (!g_noise)
-    {
-        g_noise = new OpenSimplexNoise::Noise(0);
-    }
+    const int oct = static_cast<int>(octaves);
 
     return open_simplex_fractal(
-        [&](double f) { return g_noise->eval(x * f, y * f, z * f); },
+        [&](double f) { return g_noise.eval(x * f, y * f, z * f); },
         amplitude,
-        octaves
+        oct
     );
 }
 
 func double open_simplex_noise_4d(double x, double y, double z, double w, double amplitude, double octaves)
 {
-    if (!g_noise)
-    {
-        g_noise = new OpenSimplexNoise::Noise(0);
-    }
-    
+    const int oct = static_cast<int>(octaves);
+
     return open_simplex_fractal(
-        [&](double f) { return g_noise->eval(x * f, y * f, z * f, w * f); },
+        [&](double f) { return g_noise.eval(x * f, y * f, z * f, w * f); },
         amplitude,
-        octaves
+        oct
     );
 }
